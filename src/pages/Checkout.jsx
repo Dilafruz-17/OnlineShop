@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const DELIVERY = 5;
 
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
-  const [form, setForm] = useState({ name: "", phone: "", address: "" });
+  const { user } = useAuth();
+  const [form, setForm] = useState({ name: user?.name || "", phone: "", address: "" });
   const [payment, setPayment] = useState("Karta");
   const [error, setError] = useState("");
   const [orderId, setOrderId] = useState(null);

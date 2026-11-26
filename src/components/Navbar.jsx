@@ -1,8 +1,16 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const { totalCount } = useCart();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <header className="navbar">
@@ -23,7 +31,18 @@ export default function Navbar() {
             Savat
             {totalCount > 0 && <span className="badge">{totalCount}</span>}
           </NavLink>
-          <NavLink to="/login">Kirish</NavLink>
+
+          {user ? (
+            <>
+              <span className="user-chip">
+                <span className="avatar">{user.name.charAt(0).toUpperCase()}</span>
+                {user.name}
+              </span>
+              <button className="nav-btn" onClick={handleLogout}>Chiqish</button>
+            </>
+          ) : (
+            <NavLink to="/login">Kirish</NavLink>
+          )}
         </nav>
       </div>
     </header>

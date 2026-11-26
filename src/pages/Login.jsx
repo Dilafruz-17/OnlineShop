@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
+  const { user, login, register } = useAuth();
   const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
+
+  if (user) return <Navigate to="/" replace />;
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -14,6 +18,11 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (isRegister && !form.name.trim()) {
+      setError("Ismingizni kiriting.");
+      return;
+    }
     if (!form.email.includes("@")) {
       setError("To‘g‘ri email kiriting.");
       return;
@@ -22,11 +31,19 @@ export default function Login() {
       setError("Parol kamida 6 ta belgidan iborat bo‘lsin.");
       return;
     }
-    if (isRegister && !form.name.trim()) {
-      setError("Ismingizni kiriting.");
+
+    const result = isRegister ? register(form) : login(form);
+
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
     navigate("/");
+  };
+
+  const switchMode = () => {
+    setIsRegister(!isRegister);
+    setError("");
   };
 
   return (
@@ -60,19 +77,17 @@ export default function Login() {
           onChange={handleChange}
         />
 
-        {error && <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p>}
+        {error && <p className="form-error">{error}</p>}
 
-        <button type="submit" className="btn">
+        <button type="submit" className="btn btn-block">
           {isRegister ? "Ro‘yxatdan o‘tish" : "Kirish"}
         </button>
       </form>
 
-      <p
-        className="muted"
-        style={{ textAlign: "center", marginTop: 12, cursor: "pointer" }}
-        onClick={() => setIsRegister(!isRegister)}
-      >
-        {isRegister ? "Hisobingiz bormi? Kirish" : "Hisobingiz yo‘qmi? Ro‘yxatdan o‘tish"}
+      <p className="muted switch-mode" onClick={switchMode}>
+        {isRegister
+          ? "Hisobingiz bormi? Kirish"
+          : "Hisobingiz yo‘qmi? Ro‘yxatdan o‘tish"}
       </p>
     </div>
   );
